@@ -9,19 +9,7 @@ const fetchAndStoreFactions = async () => {
     const factions = res.data;
 
     for (const faction of factions) {
-      // Ensure all required properties are present
-      const safeFaction = {
-        id: faction.id,
-        race: faction.race || "Unknown",
-        icon_url: faction.icon_url || "",
-        difficulty: faction.difficulty || "Normal",
-        slug: faction.slug || "",
-        faction: faction.faction || "Unknown",
-        lord: faction.lord || "Unknown",
-        summary: faction.summary || "",
-        dlc_required: faction.dlc_required || "None",
-      };
-      await Faction.findOneAndUpdate({ id: safeFaction.id }, safeFaction, {
+      await Faction.findOneAndUpdate({ id: faction.id }, faction, {
         upsert: true,
         new: true,
       });
