@@ -1,6 +1,11 @@
 const axios = require("axios");
 const Faction = require("../models/Faction");
 
+// Example sum function for unit test
+function sum(a, b) {
+  return a + b;
+}
+
 const fetchAndStoreFactions = async () => {
   try {
     const res = await axios.get(
@@ -21,4 +26,4 @@ const fetchAndStoreFactions = async () => {
   }
 };
 
-module.exports = fetchAndStoreFactions;
+module.exports = { fetchAndStoreFactions, sum };
