@@ -44,7 +44,7 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 const connectDB = require("./config/db");
 const Faction = require("./models/Faction");
 const factionsRoutes = require("./routes/factionsRoutes");
-const fetchAndStoreFactions = require("./services/fetchExternalData");
+const { fetchAndStoreFactions } = require("./services/fetchExternalData");
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
