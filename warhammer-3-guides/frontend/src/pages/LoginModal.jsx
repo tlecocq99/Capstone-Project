@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Modal, Box, Button, Typography, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../contexts/UserContext";
 
 export default function LoginModal({ open, handleClose }) {
   const [username, setUsername] = React.useState("");
   const [birthYear, setBirthYear] = React.useState("");
   const navigate = useNavigate();
+  const { user, setUser } = useContext(UserContext); // get user and setUser from context
 
   const handleLogin = async () => {
     try {
@@ -17,17 +19,23 @@ export default function LoginModal({ open, handleClose }) {
         body: JSON.stringify({ username, birthYear }),
       });
       if (res.ok) {
-        //login success
+        const userData = await res.json();
+        setUser(userData.user);
         alert("Login successful!");
         handleClose();
       } else {
-        //login failed
         const data = await res.json();
         alert(data.message || "Login failed");
       }
     } catch (err) {
       alert("Error logging in");
     }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    alert("Logged out successfully!");
+    handleClose();
   };
 
   const handleSignUp = () => {
@@ -50,40 +58,58 @@ export default function LoginModal({ open, handleClose }) {
           minWidth: 300,
         }}
       >
-        <Typography variant="h6" mb={2}>
-          Login
-        </Typography>
-        <TextField
-          label="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Birth Year"
-          value={birthYear}
-          onChange={(e) => setBirthYear(e.target.value)}
-          fullWidth
-          margin="normal"
-          type="number"
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleLogin}
-          sx={{ mt: 2 }}
-        >
-          Login
-        </Button>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={handleSignUp}
-          sx={{ mt: 2 }}
-        >
-          Sign Up / Create Account
-        </Button>
+        {user ? (
+          <>
+            <Typography variant="h6" mb={2}>
+              Welcome, {user.username}!
+            </Typography>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleLogout}
+              sx={{ mt: 2 }}
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <>
+            <Typography variant="h6" mb={2}>
+              Login
+            </Typography>
+            <TextField
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Birth Year"
+              value={birthYear}
+              onChange={(e) => setBirthYear(e.target.value)}
+              fullWidth
+              margin="normal"
+              type="number"
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleLogin}
+              sx={{ mt: 2 }}
+            >
+              Login
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleSignUp}
+              sx={{ mt: 2 }}
+            >
+              Sign Up / Create Account
+            </Button>
+          </>
+        )}
       </Box>
     </Modal>
   );

@@ -1,6 +1,8 @@
 import RandomFactionSlot from "../components/RandomFactionSlot";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { UserContext } from "../contexts/UserContext";
+import LoginModal from "./LoginModal";
 import { useNavigate } from "react-router-dom";
 import { Button, Typography, Box, Fade, Container, Paper } from "@mui/material";
 
@@ -14,6 +16,10 @@ export default function HomePage() {
       .get("http://localhost:3001/api/factions")
       .then((res) => setFactions(res.data));
   }, []);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const { user } = useContext(UserContext);
+  const handleLoginOpen = () => setLoginOpen(true);
+  const handleLoginClose = () => setLoginOpen(false);
 
   return (
     <Fade in={true} timeout={2000}>
@@ -52,6 +58,16 @@ export default function HomePage() {
               textAlign: "center",
             }}
           >
+            <div style={{ position: "absolute", top: 16, right: 16 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleLoginOpen}
+              >
+                {user ? `Logged in as ${user.username}` : "Login"}
+              </Button>
+            </div>
+            <LoginModal open={loginOpen} handleClose={handleLoginClose} />
             Warhammer 3 Guides
           </Typography>
           <Typography

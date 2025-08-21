@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { UserContext } from "../contexts/UserContext";
 import { Box, Button, TextField, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -6,6 +7,10 @@ export default function FeedbackPage() {
   const [form, setForm] = useState({ name: "", feedback: "" });
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
+  const [loginOpen, setLoginOpen] = useState(false);
+  const { user } = useContext(UserContext);
+  const handleLoginOpen = () => setLoginOpen(true);
+  const handleLoginClose = () => setLoginOpen(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -102,6 +107,12 @@ export default function FeedbackPage() {
             </Box>
           </form>
         )}
+        <div style={{ position: "absolute", top: 16, right: 16 }}>
+          <Button variant="contained" color="primary" onClick={handleLoginOpen}>
+            {user ? `Logged in as ${user.username}` : "Login"}
+          </Button>
+        </div>
+        <LoginModal open={loginOpen} handleClose={handleLoginClose} />
       </Paper>
     </Box>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useContext } from "react";
 import axios from "axios";
 import {
   Container,
@@ -16,72 +16,114 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { UserContext } from "../contexts/UserContext";
+import LoginModal from "./LoginModal";
 import { Link, useNavigate } from "react-router-dom";
 import FactionCard from "../components/FactionCard";
 import RandomFactionSlot from "../components/RandomFactionSlot";
 
-export default function FactionsListPage() {
+function FactionsListPage() {
   const [factions, setFactions] = useState([]);
   const [search, setSearch] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [race, setRace] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [openRandomModal, setOpenRandomModal] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const { user, savedFactions, setSavedFactions } = useContext(UserContext);
+  const handleLoginOpen = () => setLoginOpen(true);
+  const handleLoginClose = () => setLoginOpen(false);
   const navigate = useNavigate();
+
+  const handleSaveFaction = async (slug) => {
+    if (!user) return;
+    const res = await axios.post(
+      "http://localhost:3001/api/auth/save-faction",
+      {
+        username: user.username,
+        factionSlug: slug,
+      }
+    );
+    if (res.data.success) setSavedFactions(res.data.savedFactions);
+  };
+
+  const handleUnsaveFaction = async (slug) => {
+    if (!user) return;
+    const res = await axios.post(
+      "http://localhost:3001/api/auth/unsave-faction",
+      {
+        username: user.username,
+        factionSlug: slug,
+      }
+    );
+    if (res.data.success) setSavedFactions(res.data.savedFactions);
+  };
+
+  // Dummy data for races and difficulties if not defined elsewhere
+  const races = useMemo(
+    () => [
+      "Empire",
+      "Dwarfs",
+      "High Elves",
+      "Dark Elves",
+      "Chaos Dwarfs",
+      "Lizardmen",
+      "Skaven",
+      "Tomb Kings",
+      "Ogre Kingdoms",
+      "Vampire Coast",
+    ],
+    []
+  );
+  const difficulties = useMemo(
+    () => ["Easy", "Normal", "Hard", "Legendary"],
+    []
+  );
 
   useEffect(() => {
     axios
       .get("http://localhost:3001/api/factions")
-      .then((res) => setFactions(res.data))
-      .catch((err) => console.error(err));
+      .then((res) => setFactions(res.data));
   }, []);
 
-  const races = useMemo(
-    () => [...new Set(factions.map((f) => f.race))].sort(),
-    [factions]
-  );
-  const difficultyOrder = ["Easy", "Normal", "Hard"];
-  const difficulties = [...new Set(factions.map((f) => f.difficulty))].sort(
-    (a, b) => difficultyOrder.indexOf(a) - difficultyOrder.indexOf(b)
-  );
+  // Filtering logic
+  const filtered = useMemo(() => {
+    return factions.filter((f) => {
+      const matchesSearch =
+        (f.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (f.race?.toLowerCase() || "").includes(search.toLowerCase());
+      const matchesRace = race ? f.race === race : true;
+      const matchesDifficulty = difficulty ? f.difficulty === difficulty : true;
+      return matchesSearch && matchesRace && matchesDifficulty;
+    });
+  }, [factions, search, race, difficulty]);
 
-  const getFilteredFactions = () =>
-    factions.filter(
-      (f) =>
-        f &&
-        typeof f.faction === "string" &&
-        typeof f.lord === "string" &&
-        typeof f.race === "string" &&
-        (f.faction.toLowerCase().includes(search.toLowerCase()) ||
-          f.lord.toLowerCase().includes(search.toLowerCase()) ||
-          f.race.toLowerCase().includes(search.toLowerCase())) &&
-        (race ? f.race === race : true) &&
-        (difficulty ? f.difficulty === difficulty : true)
-    );
-
-  const filtered = getFilteredFactions();
-
-  // Filter controls handlers
   const handleRaceChange = (e) => setRace(e.target.value);
   const handleDifficultyChange = (e) => setDifficulty(e.target.value);
   const handleClearFilters = () => {
     setRace("");
     setDifficulty("");
-    setFilterOpen(false);
   };
 
   return (
     <Container
       maxWidth="xl"
       sx={{
+        height: "100vh", // instead of minHeight
         backgroundImage: "url('/splashArt.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        minHeight: "100vh",
         borderRadius: 2,
         overflow: "hidden",
+        position: "relative",
       }}
     >
+      <div style={{ position: "absolute", top: 16, right: 16, zIndex: 10 }}>
+        <Button variant="contained" color="primary" onClick={handleLoginOpen}>
+          {user ? `Logged in as ${user.username}` : "Login"}
+        </Button>
+      </div>
+      <LoginModal open={loginOpen} handleClose={handleLoginClose} />
       <Typography
         backgroundColor={"rgba(0, 0, 0, 0.5)"}
         fontFamily={"Manufacturing Consent"}
@@ -95,7 +137,7 @@ export default function FactionsListPage() {
       >
         Warhammer 3 Faction Guides
       </Typography>
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+      <Box sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
         <TextField
           fullWidth
           placeholder="Search for a faction, lord, or race..."
@@ -120,6 +162,57 @@ export default function FactionsListPage() {
           Feeling Frisky? (Random Faction)
         </Button>
 
+        {/* Saved Factions Dropdown */}
+        {user && (
+          <FormControl sx={{ minWidth: 180 }}>
+            <InputLabel id="saved-factions-label">Saved Factions</InputLabel>
+            <Select
+              labelId="saved-factions-label"
+              label="Saved Factions"
+              defaultValue=""
+              sx={{ backgroundColor: "rgba(145, 164, 223, 1)" }}
+            >
+              {savedFactions.length === 0 ? (
+                <MenuItem value="" disabled>
+                  No saved factions yet.
+                </MenuItem>
+              ) : (
+                savedFactions.map((slug) => {
+                  const faction = factions.find((f) => f.slug === slug);
+                  return (
+                    <MenuItem key={slug} value={slug}>
+                      <Link
+                        to={`/factions/${slug}`}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          textDecoration: "none",
+                          color: "#1976d2",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {faction && faction.icon_url && (
+                          <img
+                            src={faction.icon_url}
+                            alt={faction.faction + " logo"}
+                            style={{
+                              width: 24,
+                              height: 24,
+                              marginRight: 8,
+                              borderRadius: 4,
+                            }}
+                          />
+                        )}
+                        {faction ? faction.faction : slug}
+                      </Link>
+                    </MenuItem>
+                  );
+                })
+              )}
+            </Select>
+          </FormControl>
+        )}
+
         <RandomFactionSlot
           factions={factions}
           open={openRandomModal}
@@ -127,7 +220,6 @@ export default function FactionsListPage() {
           navigateToFaction={(slug) => navigate(`/factions/${slug}`)}
         />
       </Box>
-
       {/* Filter Modal */}
       <Dialog open={filterOpen} onClose={() => setFilterOpen(false)}>
         <DialogTitle>Filter Factions</DialogTitle>
@@ -177,6 +269,28 @@ export default function FactionsListPage() {
               >
                 <FactionCard faction={f} />
               </Link>
+              {user &&
+                (savedFactions.includes(f.slug) ? (
+                  <Button
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                    onClick={() => handleUnsaveFaction(f.slug)}
+                    sx={{ mt: 1 }}
+                  >
+                    Unsave
+                  </Button>
+                ) : (
+                  <Button
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={() => handleSaveFaction(f.slug)}
+                    sx={{ mt: 1 }}
+                  >
+                    Save
+                  </Button>
+                ))}
             </Grid>
           ))}
         </Grid>
@@ -187,3 +301,5 @@ export default function FactionsListPage() {
     </Container>
   );
 }
+
+export default FactionsListPage;

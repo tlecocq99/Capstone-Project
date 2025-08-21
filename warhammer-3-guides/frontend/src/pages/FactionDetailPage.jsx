@@ -1,14 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { Container, Typography, Paper, Button } from "@mui/material";
 import LoginModal from "./LoginModal";
+import { UserContext } from "../contexts/UserContext";
 
-export default function FactionDetailPage() {
+function FactionDetailPage() {
   const { slug } = useParams();
   const [faction, setFaction] = useState(null);
   const [loginOpen, setLoginOpen] = useState(false);
+  const { user, savedFactions, setSavedFactions } = useContext(UserContext);
+  // Save/Unsave logic
+  const handleSaveFaction = async (slug) => {
+    if (!user) return;
+    const res = await axios.post(
+      "http://localhost:3001/api/auth/save-faction",
+      {
+        username: user.username,
+        factionSlug: slug,
+      }
+    );
+    if (res.data.success) setSavedFactions(res.data.savedFactions);
+  };
 
+  const handleUnsaveFaction = async (slug) => {
+    if (!user) return;
+    const res = await axios.post(
+      "http://localhost:3001/api/auth/unsave-faction",
+      {
+        username: user.username,
+        factionSlug: slug,
+      }
+    );
+    if (res.data.success) setSavedFactions(res.data.savedFactions);
+  };
   const handleLoginOpen = () => setLoginOpen(true);
   const handleLoginClose = () => setLoginOpen(false);
 
@@ -26,7 +51,7 @@ export default function FactionDetailPage() {
       {/*Login button*/}
       <div style={{ position: "absolute", top: 16, right: 16 }}>
         <Button variant="contained" color="primary" onClick={handleLoginOpen}>
-          Login
+          {user ? `Logged in as ${user.username}` : "Login"}
         </Button>
       </div>
       <LoginModal open={loginOpen} handleClose={handleLoginClose} />
@@ -89,16 +114,45 @@ export default function FactionDetailPage() {
               ))}
             </ul>
           </Typography>
-          <Button
-            component={Link}
-            to="/factions"
-            variant="contained"
-            sx={{ mt: 3 }}
+          {/* Save/Unsave Button */}
+          {/* Button Row: Back to Factions (left), Save/Unsave (right) */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 32,
+            }}
           >
-            Back to Factions
-          </Button>
+            <Button component={Link} to="/factions" variant="contained">
+              Back to Factions
+            </Button>
+            {user &&
+              (savedFactions.includes(faction.slug) ? (
+                <Button
+                  size="medium"
+                  color="secondary"
+                  variant="outlined"
+                  onClick={() => handleUnsaveFaction(faction.slug)}
+                >
+                  Unsave
+                </Button>
+              ) : (
+                <Button
+                  size="medium"
+                  color="primary"
+                  variant="contained"
+                  onClick={() => handleSaveFaction(faction.slug)}
+                >
+                  Save
+                </Button>
+              ))}
+          </div>
         </Paper>
+        {/* ...existing code... */}
       </Container>
     </>
   );
 }
+
+export default FactionDetailPage;
