@@ -23,7 +23,7 @@ export default function LoginModal({ open, handleClose }) {
   );
   const navigate = useNavigate();
   const { user, setUser, savedFactions, setSavedFactions } =
-    useContext(UserContext); // include saved factions handlers
+    useContext(UserContext); //saved factions handlers
 
   const handleLogin = async () => {
     try {

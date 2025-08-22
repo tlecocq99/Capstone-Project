@@ -40,6 +40,7 @@ function FactionsListPage() {
   const handleLoginOpen = () => setLoginOpen(true);
   const handleLoginClose = () => setLoginOpen(false);
 
+  // Save faction handler
   const handleSaveFaction = async (slug) => {
     if (!user) return;
     const res = await axios.post(
@@ -52,6 +53,7 @@ function FactionsListPage() {
     if (res.data.success) setSavedFactions(res.data.savedFactions);
   };
 
+  // Unsave faction handler
   const handleUnsaveFaction = async (slug) => {
     if (!user) return;
     const res = await axios.post(
@@ -87,6 +89,7 @@ function FactionsListPage() {
       .then((res) => setFactions(res.data));
   }, []);
 
+  // Filter factions based on search and selected filters
   const filtered = useMemo(() => {
     return factions.filter((f) => {
       const q = search.toLowerCase();
@@ -125,6 +128,7 @@ function FactionsListPage() {
         flexDirection: "column",
       }}
     >
+      {/* Login button container */}
       <Box sx={{ position: "absolute", top: 4, right: 8, zIndex: 10 }}>
         <Button
           size={isXs ? "small" : "medium"}
@@ -238,6 +242,7 @@ function FactionsListPage() {
             </Select>
           </FormControl>
         )}
+        {/* Random faction roller */}
         <RandomFactionSlot
           factions={factions}
           open={openRandomModal}
