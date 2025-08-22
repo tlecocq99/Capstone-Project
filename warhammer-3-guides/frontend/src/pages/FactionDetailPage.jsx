@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { Container, Typography, Paper, Button } from "@mui/material";
@@ -10,6 +12,8 @@ function FactionDetailPage() {
   const [faction, setFaction] = useState(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, savedFactions, setSavedFactions } = useContext(UserContext);
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
   // Save/Unsave logic
   const handleSaveFaction = async (slug) => {
     if (!user) return;
@@ -49,55 +53,72 @@ function FactionDetailPage() {
   return (
     <>
       {/*Login button*/}
-      <div style={{ position: "absolute", top: 16, right: 16 }}>
-        <Button variant="contained" color="primary" onClick={handleLoginOpen}>
+      <div style={{ position: "absolute", top: 4, right: 8 }}>
+        <Button
+          size={isXs ? "small" : "medium"}
+          variant="contained"
+          color="primary"
+          onClick={handleLoginOpen}
+        >
           {user ? `Logged in as ${user.username}` : "Login"}
         </Button>
       </div>
       <LoginModal open={loginOpen} handleClose={handleLoginClose} />
       <Container
-        maxWidth="sm"
+        maxWidth="md"
         sx={{
-          mt: 8,
-          mb: 8,
+          mt: { xs: 4, md: 8 },
+          mb: { xs: 4, md: 8 },
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "80vh",
-          backgroundColor: "rgba(17, 11, 11, 0.07)", // light gray background
+          minHeight: { xs: "auto", md: "80vh" },
+          backgroundColor: "rgba(17, 11, 11, 0.07)",
           borderRadius: 3,
           boxShadow: "0 2px 16px 0 rgba(34, 34, 34, 0.69)",
+          px: { xs: 2, sm: 3 },
         }}
       >
         <Paper
           sx={{
-            p: 4,
+            p: { xs: 3, md: 4 },
             borderRadius: 3,
             boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)",
             width: "100%",
             background: "#fff",
           }}
         >
-          <Typography variant="h4" gutterBottom>
+          <Typography
+            variant={isXs ? "h5" : "h4"}
+            gutterBottom
+            sx={{ textAlign: { xs: "center", md: "left" } }}
+          >
             {faction.faction} — {faction.lord}
           </Typography>
           <img
             src={faction.icon_url}
             alt={faction.faction}
             style={{
-              width: 100,
-              height: 100,
+              width: isXs ? 80 : 100,
+              height: isXs ? 80 : 100,
               objectFit: "contain",
               marginBottom: 16,
+              display: "block",
+              marginLeft: isXs ? "auto" : 0,
+              marginRight: isXs ? "auto" : 0,
             }}
           />
-          <Typography variant="h6" mt={2}>
+          <Typography variant={isXs ? "subtitle1" : "h6"} mt={2}>
             Race: {faction.race}
           </Typography>
-          <Typography variant="body1" mt={2}>
+          <Typography
+            variant="body1"
+            mt={2}
+            sx={{ textAlign: { xs: "justify", md: "left" } }}
+          >
             {faction.summary}
           </Typography>
-          <Typography variant="subtitle1" mt={2}>
+          <Typography variant={isXs ? "subtitle2" : "subtitle1"} mt={2}>
             Starting Position: {faction.start_position}
           </Typography>
           <Typography variant="subtitle2" mt={1}>
@@ -106,7 +127,12 @@ function FactionDetailPage() {
           <Typography variant="subtitle2" mt={1}>
             DLC Required: {faction.dlc_required}
           </Typography>
-          <Typography variant="body2" mt={2} component={"div"}>
+          <Typography
+            variant="body2"
+            mt={2}
+            component={"div"}
+            sx={{ fontSize: { xs: "0.85rem", md: "0.9rem" } }}
+          >
             <strong>Tips:</strong>
             <ul style={{ marginTop: 8, marginBottom: 0, paddingLeft: 20 }}>
               {faction.tips.map((tip, i) => (
@@ -119,18 +145,25 @@ function FactionDetailPage() {
           <div
             style={{
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: isXs ? "center" : "space-between",
               alignItems: "center",
               marginTop: 32,
+              flexWrap: "wrap",
+              gap: 12,
             }}
           >
-            <Button component={Link} to="/factions" variant="contained">
+            <Button
+              component={Link}
+              to="/factions"
+              variant="contained"
+              size={isXs ? "small" : "medium"}
+            >
               Back to Factions
             </Button>
             {user &&
               (savedFactions.includes(faction.slug) ? (
                 <Button
-                  size="medium"
+                  size={isXs ? "small" : "medium"}
                   color="secondary"
                   variant="outlined"
                   onClick={() => handleUnsaveFaction(faction.slug)}
@@ -139,7 +172,7 @@ function FactionDetailPage() {
                 </Button>
               ) : (
                 <Button
-                  size="medium"
+                  size={isXs ? "small" : "medium"}
                   color="primary"
                   variant="contained"
                   onClick={() => handleSaveFaction(faction.slug)}

@@ -1,6 +1,12 @@
-const express = require("express");
+import express from "express";
+import {
+  getFactions,
+  getFactionBySlug,
+  createFaction,
+  updateFaction,
+  deleteFaction,
+} from "../controllers/factionsController.js";
 const router = express.Router();
-const factionsController = require("../controllers/factionsController");
 
 /**
  * @swagger
@@ -45,7 +51,7 @@ const factionsController = require("../controllers/factionsController");
 // GET all factions
 router.get("/", async (req, res) => {
   try {
-    await factionsController.getFactions(req, res);
+    await getFactions(req, res);
   } catch (err) {
     res.status(500).json({ error: "Server error", details: err.message });
   }
@@ -54,7 +60,7 @@ router.get("/", async (req, res) => {
 // GET faction by slug
 router.get("/:slug", async (req, res) => {
   try {
-    await factionsController.getFactionBySlug(req, res);
+    await getFactionBySlug(req, res);
   } catch (err) {
     res.status(500).json({ error: "Server error", details: err.message });
   }
@@ -79,7 +85,7 @@ router.get("/:slug", async (req, res) => {
  */
 router.post("/", async (req, res) => {
   try {
-    await factionsController.createFaction(req, res);
+    await createFaction(req, res);
   } catch (err) {
     res.status(500).json({ error: "Server error", details: err.message });
   }
@@ -110,7 +116,7 @@ router.post("/", async (req, res) => {
  */
 router.put("/:slug", async (req, res) => {
   try {
-    await factionsController.updateFaction(req, res);
+    await updateFaction(req, res);
   } catch (err) {
     res.status(500).json({ error: "Server error", details: err.message });
   }
@@ -135,10 +141,9 @@ router.put("/:slug", async (req, res) => {
  */
 router.delete("/:slug", async (req, res) => {
   try {
-    await factionsController.deleteFaction(req, res);
+    await deleteFaction(req, res);
   } catch (err) {
     res.status(500).json({ error: "Server error", details: err.message });
   }
 });
-
-module.exports = router;
+export default router;

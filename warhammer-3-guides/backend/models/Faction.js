@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const FactionSchema = new mongoose.Schema({
   id: Number,
@@ -14,4 +14,4 @@ const FactionSchema = new mongoose.Schema({
   slug: String,
 });
 
-module.exports = mongoose.model("Faction", FactionSchema);
+export default mongoose.model("Faction", FactionSchema);

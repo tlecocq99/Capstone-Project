@@ -1,12 +1,12 @@
-const axios = require("axios");
-const Faction = require("../models/Faction");
+import axios from "axios";
+import Faction from "../models/Faction.js";
 
 // Example sum function for unit test
 function sum(a, b) {
   return a + b;
 }
 
-const fetchAndStoreFactions = async () => {
+export const fetchAndStoreFactions = async () => {
   try {
     const res = await axios.get(
       "https://raw.githubusercontent.com/tlecocq99/mini-project-2/main/warhammer-3-guides/backend/data/factions.json"
@@ -26,4 +26,4 @@ const fetchAndStoreFactions = async () => {
   }
 };
 
-module.exports = { fetchAndStoreFactions, sum };
+export { sum };

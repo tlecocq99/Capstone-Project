@@ -1,7 +1,7 @@
-const Faction = require("../models/Faction");
+import Faction from "../models/Faction.js";
 
 // READ - all factions
-exports.getFactions = async (req, res) => {
+export const getFactions = async (req, res) => {
   try {
     const factions = await Faction.find();
     res.json(factions);
@@ -11,7 +11,7 @@ exports.getFactions = async (req, res) => {
 };
 
 // READ - single faction by slug
-exports.getFactionBySlug = async (req, res) => {
+export const getFactionBySlug = async (req, res) => {
   try {
     const faction = await Faction.findOne({ slug: req.params.slug });
     if (!faction) return res.status(404).json({ error: "Faction not found" });
@@ -22,7 +22,7 @@ exports.getFactionBySlug = async (req, res) => {
 };
 
 // CREATE - new faction
-exports.createFaction = async (req, res) => {
+export const createFaction = async (req, res) => {
   try {
     const faction = new Faction(req.body);
     await faction.save();
@@ -33,7 +33,7 @@ exports.createFaction = async (req, res) => {
 };
 
 // UPDATE - by slug
-exports.updateFaction = async (req, res) => {
+export const updateFaction = async (req, res) => {
   try {
     const faction = await Faction.findOneAndUpdate(
       { slug: req.params.slug },
@@ -48,7 +48,7 @@ exports.updateFaction = async (req, res) => {
 };
 
 // DELETE - by slug
-exports.deleteFaction = async (req, res) => {
+export const deleteFaction = async (req, res) => {
   try {
     const faction = await Faction.findOneAndDelete({ slug: req.params.slug });
     if (!faction) return res.status(404).json({ error: "Faction not found" });

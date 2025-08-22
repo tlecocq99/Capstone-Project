@@ -5,6 +5,8 @@ import { UserContext } from "../contexts/UserContext";
 import LoginModal from "./LoginModal";
 import { useNavigate } from "react-router-dom";
 import { Button, Typography, Box, Fade, Container, Paper } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 export default function HomePage() {
   const [factions, setFactions] = useState([]);
@@ -20,6 +22,8 @@ export default function HomePage() {
   const { user } = useContext(UserContext);
   const handleLoginOpen = () => setLoginOpen(true);
   const handleLoginClose = () => setLoginOpen(false);
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Fade in={true} timeout={2000}>
@@ -49,16 +53,17 @@ export default function HomePage() {
           }}
         >
           <Typography
-            variant="h2"
+            variant={isXs ? "h4" : "h2"}
             gutterBottom
             sx={{
               color: "white",
               textShadow: "2px 4px 12px #000, 0 0 2px #222",
               fontFamily: "Playfair Display",
               textAlign: "center",
+              lineHeight: 1.2,
             }}
           >
-            <div style={{ position: "absolute", top: 16, right: 16 }}>
+            <div style={{ position: "absolute", top: 4, right: 8 }}>
               <Button
                 variant="contained"
                 color="primary"
@@ -71,12 +76,13 @@ export default function HomePage() {
             Warhammer 3 Guides
           </Typography>
           <Typography
-            variant="subtitle1"
+            variant={isXs ? "body1" : "subtitle1"}
             sx={{
               mb: 4,
               color: "white",
               textShadow: "1px 2px 6px #000",
               textAlign: "center",
+              px: { xs: 1, md: 0 },
             }}
           >
             Your one-stop-shop for detailed faction guides.
@@ -88,6 +94,7 @@ export default function HomePage() {
               mb: 2,
               flexWrap: "wrap",
               justifyContent: "center",
+              width: "100%",
             }}
           >
             <Button
@@ -103,6 +110,7 @@ export default function HomePage() {
                 color: "white",
                 fontWeight: "bold",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                width: { xs: "100%", sm: "auto" },
                 "&:hover": {
                   background: "linear-gradient(90deg, #222 0%, #b71c1c 100%)",
                   backgroundImage:
@@ -123,6 +131,7 @@ export default function HomePage() {
                 color: "white",
                 fontWeight: "bold",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                width: { xs: "100%", sm: "auto" },
                 "&:hover": {
                   background: "linear-gradient(90deg, #222 0%, #1976d2 100%)",
                 },

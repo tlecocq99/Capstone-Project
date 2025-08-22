@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo, useContext } from "react";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import axios from "axios";
 import {
   Container,
@@ -31,9 +33,12 @@ function FactionsListPage() {
   const [openRandomModal, setOpenRandomModal] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, savedFactions, setSavedFactions } = useContext(UserContext);
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
+
   const handleLoginOpen = () => setLoginOpen(true);
   const handleLoginClose = () => setLoginOpen(false);
-  const navigate = useNavigate();
 
   const handleSaveFaction = async (slug) => {
     if (!user) return;
@@ -59,7 +64,6 @@ function FactionsListPage() {
     if (res.data.success) setSavedFactions(res.data.savedFactions);
   };
 
-  // Dummy data for races and difficulties if not defined elsewhere
   const races = useMemo(
     () => [
       "Empire",
@@ -75,10 +79,7 @@ function FactionsListPage() {
     ],
     []
   );
-  const difficulties = useMemo(
-    () => ["Easy", "Normal", "Hard", "Legendary"],
-    []
-  );
+  const difficulties = useMemo(() => ["Easy", "Normal", "Hard"], []);
 
   useEffect(() => {
     axios
@@ -86,12 +87,14 @@ function FactionsListPage() {
       .then((res) => setFactions(res.data));
   }, []);
 
-  // Filtering logic
   const filtered = useMemo(() => {
     return factions.filter((f) => {
+      const q = search.toLowerCase();
       const matchesSearch =
-        (f.name?.toLowerCase() || "").includes(search.toLowerCase()) ||
-        (f.race?.toLowerCase() || "").includes(search.toLowerCase());
+        (f.faction?.toLowerCase() || "").includes(q) ||
+        (f.lord?.toLowerCase() || "").includes(q) ||
+        (f.race?.toLowerCase() || "").includes(q) ||
+        (f.slug?.toLowerCase() || "").includes(q);
       const matchesRace = race ? f.race === race : true;
       const matchesDifficulty = difficulty ? f.difficulty === difficulty : true;
       return matchesSearch && matchesRace && matchesDifficulty;
@@ -109,20 +112,29 @@ function FactionsListPage() {
     <Container
       maxWidth="xl"
       sx={{
-        height: "100vh", // instead of minHeight
+        height: "100vh", // lock to viewport
         backgroundImage: "url('/splashArt.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         borderRadius: 2,
-        overflow: "hidden",
+        overflow: "hidden", // prevent outer scroll
         position: "relative",
+        py: { xs: 4, md: 6 },
+        px: { xs: 2, md: 4 },
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <div style={{ position: "absolute", top: 16, right: 16, zIndex: 10 }}>
-        <Button variant="contained" color="primary" onClick={handleLoginOpen}>
+      <Box sx={{ position: "absolute", top: 4, right: 8, zIndex: 10 }}>
+        <Button
+          size={isXs ? "small" : "medium"}
+          variant="contained"
+          color="primary"
+          onClick={handleLoginOpen}
+        >
           {user ? `Logged in as ${user.username}` : "Login"}
         </Button>
-      </div>
+      </Box>
       <LoginModal open={loginOpen} handleClose={handleLoginClose} />
       <Typography
         backgroundColor={"rgba(0, 0, 0, 0.5)"}
@@ -130,6 +142,9 @@ function FactionsListPage() {
         sx={{
           color: "white",
           textShadow: "2px 10px 2px #000, 0 0 2px #222",
+          fontSize: { xs: "2.2rem", sm: "3.2rem", md: "4rem" },
+          lineHeight: 1.1,
+          px: 1,
         }}
         variant="h1"
         align="center"
@@ -137,19 +152,29 @@ function FactionsListPage() {
       >
         Warhammer 3 Faction Guides
       </Typography>
-      <Box sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          mb: 2,
+          alignItems: "stretch",
+          flexWrap: "wrap",
+          flexDirection: { xs: "column", sm: "row" },
+          "& > *": { flex: { xs: "1 1 auto", sm: "unset" } },
+        }}
+      >
         <TextField
           fullWidth
           placeholder="Search for a faction, lord, or race..."
           margin="none"
-          sx={{ backgroundColor: "white", mb: 2 }}
+          sx={{ backgroundColor: "white", mb: { xs: 1, sm: 0 } }}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <Button
           variant="outlined"
           color="primary"
-          sx={{ minWidth: 120 }}
+          sx={{ minWidth: 120, height: { xs: 40, sm: "auto" } }}
           onClick={() => setFilterOpen(true)}
         >
           Filters
@@ -158,13 +183,14 @@ function FactionsListPage() {
           variant="contained"
           color="secondary"
           onClick={() => setOpenRandomModal(true)}
+          sx={{ height: { xs: 40, sm: "auto" } }}
         >
           Feeling Frisky? (Random Faction)
         </Button>
-
-        {/* Saved Factions Dropdown */}
         {user && (
-          <FormControl sx={{ minWidth: 180 }}>
+          <FormControl
+            sx={{ minWidth: 180, flex: { xs: "1 1 auto", sm: "unset" } }}
+          >
             <InputLabel id="saved-factions-label">Saved Factions</InputLabel>
             <Select
               labelId="saved-factions-label"
@@ -212,7 +238,6 @@ function FactionsListPage() {
             </Select>
           </FormControl>
         )}
-
         <RandomFactionSlot
           factions={factions}
           open={openRandomModal}
@@ -220,7 +245,6 @@ function FactionsListPage() {
           navigateToFaction={(slug) => navigate(`/factions/${slug}`)}
         />
       </Box>
-      {/* Filter Modal */}
       <Dialog open={filterOpen} onClose={() => setFilterOpen(false)}>
         <DialogTitle>Filter Factions</DialogTitle>
         <DialogContent sx={{ minWidth: 300 }}>
@@ -258,42 +282,66 @@ function FactionsListPage() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Box sx={{ maxHeight: "73vh", overflowY: "auto", pr: 1, mb: 4 }}>
-        <Grid container spacing={2} justifyContent="center">
-          {filtered.map((f) => (
-            <Grid item key={f.id}>
-              <Link
-                to={`/factions/${f.slug}`}
-                style={{ textDecoration: "none" }}
+      <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+        <Box
+          sx={{
+            height: "100%",
+            overflowY: "auto",
+            pr: 1,
+            pb: 2,
+          }}
+        >
+          <Grid container spacing={2} justifyContent="center">
+            {filtered.map((f) => (
+              <Grid
+                item
+                key={f.id}
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                xl={2}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
               >
-                <FactionCard faction={f} />
-              </Link>
-              {user &&
-                (savedFactions.includes(f.slug) ? (
-                  <Button
-                    size="small"
-                    color="secondary"
-                    variant="outlined"
-                    onClick={() => handleUnsaveFaction(f.slug)}
-                    sx={{ mt: 1 }}
-                  >
-                    Unsave
-                  </Button>
-                ) : (
-                  <Button
-                    size="small"
-                    color="primary"
-                    variant="contained"
-                    onClick={() => handleSaveFaction(f.slug)}
-                    sx={{ mt: 1 }}
-                  >
-                    Save
-                  </Button>
-                ))}
-            </Grid>
-          ))}
-        </Grid>
+                <Link
+                  to={`/factions/${f.slug}`}
+                  style={{ textDecoration: "none", width: "100%" }}
+                >
+                  <FactionCard faction={f} />
+                </Link>
+                {user &&
+                  (savedFactions.includes(f.slug) ? (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => handleUnsaveFaction(f.slug)}
+                      sx={{
+                        mt: 1,
+                        color: "rgba(229, 145, 0, 0.85)",
+                        bgcolor: "rgba(255, 34, 0, 0.51)",
+                      }}
+                    >
+                      Unsave
+                    </Button>
+                  ) : (
+                    <Button
+                      size="small"
+                      color="primary"
+                      variant="contained"
+                      onClick={() => handleSaveFaction(f.slug)}
+                      sx={{ mt: 1 }}
+                    >
+                      Save
+                    </Button>
+                  ))}
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       </Box>
       {(!Array.isArray(filtered) || filtered.length === 0) && (
         <Typography>No factions found or loading...</Typography>

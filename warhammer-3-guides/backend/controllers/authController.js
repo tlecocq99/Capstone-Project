@@ -1,4 +1,6 @@
-exports.saveFaction = async (req, res) => {
+import User from "../models/User.js";
+
+export const saveFaction = async (req, res) => {
   const { username, factionSlug } = req.body;
   try {
     const user = await User.findOneAndUpdate(
@@ -12,7 +14,7 @@ exports.saveFaction = async (req, res) => {
   }
 };
 
-exports.unsaveFaction = async (req, res) => {
+export const unsaveFaction = async (req, res) => {
   const { username, factionSlug } = req.body;
   try {
     const user = await User.findOneAndUpdate(
@@ -25,9 +27,7 @@ exports.unsaveFaction = async (req, res) => {
     res.status(400).json({ success: false, message: err.message });
   }
 };
-const User = require("../models/User");
-
-exports.signup = async (req, res) => {
+export const signup = async (req, res) => {
   const { username, birthYear } = req.body;
   try {
     const user = new User({ username, birthYear });
@@ -38,7 +38,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   const { username, birthYear } = req.body;
   try {
     const user = await User.findOne({ username, birthYear });
