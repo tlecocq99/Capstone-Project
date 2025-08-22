@@ -22,7 +22,8 @@ export default function LoginModal({ open, handleClose }) {
     () => !!localStorage.getItem("rememberLogin")
   );
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserContext); // get user and setUser from context
+  const { user, setUser, savedFactions, setSavedFactions } =
+    useContext(UserContext); // include saved factions handlers
 
   const handleLogin = async () => {
     try {
@@ -35,7 +36,9 @@ export default function LoginModal({ open, handleClose }) {
       });
       if (res.ok) {
         const userData = await res.json();
+        // Set user and hydrate saved factions from backend response
         setUser(userData.user);
+        setSavedFactions(userData.user?.savedFactions || []);
         if (remember) {
           localStorage.setItem("username", username);
           localStorage.setItem("birthYear", birthYear);
@@ -57,6 +60,7 @@ export default function LoginModal({ open, handleClose }) {
 
   const handleLogout = () => {
     setUser(null);
+    setSavedFactions([]); // clear saved factions on logout
     handleClose();
   };
 

@@ -32,7 +32,7 @@ export const signup = async (req, res) => {
   try {
     const user = new User({ username, birthYear });
     await user.save();
-    res.json({ success: true, user });
+    res.json({ success: true, user }); // user includes savedFactions (empty array)
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -43,10 +43,32 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ username, birthYear });
     if (user) {
-      res.json({ success: true, user });
+      // Explicitly include savedFactions to ensure frontend hydration
+      res.json({
+        success: true,
+        user: { ...user.toObject(), savedFactions: user.savedFactions || [] },
+      });
     } else {
       res.status(401).json({ success: false, message: "Invalid credentials" });
     }
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+export const getUser = async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    res.json({
+      success: true,
+      user: { ...user.toObject(), savedFactions: user.savedFactions || [] },
+    });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
