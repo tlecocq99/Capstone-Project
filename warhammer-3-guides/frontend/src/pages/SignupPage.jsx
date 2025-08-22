@@ -1,12 +1,23 @@
 import React, { useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box, Button, Typography, TextField } from "@mui/material";
+import LoginModal from "./LoginModal";
+import { UserContext } from "../contexts/UserContext";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [error, setError] = useState("");
+  const { user } = useContext(UserContext);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const handleLoginOpen = () => setLoginOpen(true);
+  const handleLoginClose = () => setLoginOpen(false);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleSignup = async () => {
     setError("");
@@ -31,16 +42,31 @@ export default function SignupPage() {
   return (
     <Box
       sx={{
-        maxWidth: 400,
+        maxWidth: 420,
         mx: "auto",
-        mt: 8,
-        p: 4,
+        mt: { xs: 4, md: 8 },
+        p: { xs: 3, md: 4 },
         bgcolor: "background.paper",
         borderRadius: 2,
         boxShadow: 24,
+        position: "relative",
       }}
     >
-      <Typography variant="h5" mb={2}>
+      <div style={{ position: "absolute", top: 4, right: 8 }}>
+        <Button
+          size={isXs ? "small" : "medium"}
+          variant="contained"
+          onClick={handleLoginOpen}
+        >
+          {user ? `Logged in as ${user.username}` : "Login"}
+        </Button>
+      </div>
+      <LoginModal open={loginOpen} handleClose={handleLoginClose} />
+      <Typography
+        variant={isXs ? "h6" : "h5"}
+        mb={2}
+        textAlign={isXs ? "center" : "left"}
+      >
         Create Account
       </Typography>
       <TextField

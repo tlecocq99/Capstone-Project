@@ -1,7 +1,10 @@
 import React, { useState, useContext } from "react";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { UserContext } from "../contexts/UserContext";
 import { Box, Button, TextField, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import LoginModal from "./LoginModal";
 
 export default function FeedbackPage() {
   const [form, setForm] = useState({ name: "", feedback: "" });
@@ -9,6 +12,8 @@ export default function FeedbackPage() {
   const navigate = useNavigate();
   const [loginOpen, setLoginOpen] = useState(false);
   const { user } = useContext(UserContext);
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
   const handleLoginOpen = () => setLoginOpen(true);
   const handleLoginClose = () => setLoginOpen(false);
 
@@ -16,23 +21,38 @@ export default function FeedbackPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // You could POST this to your backend or just show a thank you message.
-    setSubmitted(true);
-    setForm({ name: "", feedback: "" });
+    try {
+      await fetch("http://localhost:3001/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setSubmitted(true);
+      setForm({ name: "", email: "", feedback: "" });
+    } catch (err) {
+      alert("Failed to submit feedback.");
+    }
   };
 
   return (
     <Box
       sx={{
-        mt: 8,
+        mt: { xs: 4, md: 8 },
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        px: { xs: 2, md: 0 },
       }}
     >
-      <Paper sx={{ p: 4, width: 420 }}>
+      <Paper
+        sx={{
+          p: { xs: 3, md: 4 },
+          width: { xs: "100%", sm: 480 },
+          position: "relative",
+        }}
+      >
         <Typography variant="h4" gutterBottom align="center">
           Feedback
         </Typography>
@@ -78,6 +98,15 @@ export default function FeedbackPage() {
               sx={{ mb: 2 }}
             />
             <TextField
+              label="Email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              fullWidth
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
               label="Your Feedback"
               name="feedback"
               value={form.feedback}
@@ -107,8 +136,13 @@ export default function FeedbackPage() {
             </Box>
           </form>
         )}
-        <div style={{ position: "absolute", top: 16, right: 16 }}>
-          <Button variant="contained" color="primary" onClick={handleLoginOpen}>
+        <div style={{ position: "absolute", top: 4, right: 8 }}>
+          <Button
+            size={isXs ? "small" : "medium"}
+            variant="contained"
+            color="primary"
+            onClick={handleLoginOpen}
+          >
             {user ? `Logged in as ${user.username}` : "Login"}
           </Button>
         </div>

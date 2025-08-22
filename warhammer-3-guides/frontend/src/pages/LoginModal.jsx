@@ -1,11 +1,26 @@
 import React, { useContext } from "react";
-import { Modal, Box, Button, Typography, TextField } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
 
 export default function LoginModal({ open, handleClose }) {
-  const [username, setUsername] = React.useState("");
-  const [birthYear, setBirthYear] = React.useState("");
+  const [username, setUsername] = React.useState(
+    () => localStorage.getItem("username") || ""
+  );
+  const [birthYear, setBirthYear] = React.useState(
+    () => localStorage.getItem("birthYear") || ""
+  );
+  const [remember, setRemember] = React.useState(
+    () => !!localStorage.getItem("rememberLogin")
+  );
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext); // get user and setUser from context
 
@@ -21,7 +36,15 @@ export default function LoginModal({ open, handleClose }) {
       if (res.ok) {
         const userData = await res.json();
         setUser(userData.user);
-        alert("Login successful!");
+        if (remember) {
+          localStorage.setItem("username", username);
+          localStorage.setItem("birthYear", birthYear);
+          localStorage.setItem("rememberLogin", "true");
+        } else {
+          localStorage.removeItem("username");
+          localStorage.removeItem("birthYear");
+          localStorage.removeItem("rememberLogin");
+        }
         handleClose();
       } else {
         const data = await res.json();
@@ -34,7 +57,6 @@ export default function LoginModal({ open, handleClose }) {
 
   const handleLogout = () => {
     setUser(null);
-    alert("Logged out successfully!");
     handleClose();
   };
 
@@ -56,6 +78,11 @@ export default function LoginModal({ open, handleClose }) {
           borderRadius: 2,
           boxShadow: 24,
           minWidth: 300,
+        }}
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleLogin();
         }}
       >
         {user ? (
@@ -92,11 +119,23 @@ export default function LoginModal({ open, handleClose }) {
               margin="normal"
               type="number"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Remember Me"
+              sx={{ mt: 2 }}
+            />
             <Button
               variant="contained"
               color="primary"
               onClick={handleLogin}
               sx={{ mt: 2 }}
+              type="submit"
             >
               Login
             </Button>
