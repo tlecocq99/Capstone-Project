@@ -1,8 +1,9 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const swaggerUi = require("swagger-ui-express");
-const swaggerJsdoc = require("swagger-jsdoc");
+import dotenv from "dotenv";
+dotenv.config();
+import express, { json } from "express";
+import cors from "cors";
+import { serve, setup } from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 
 // Swagger configuration
 const swaggerOptions = {
@@ -41,17 +42,18 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-const connectDB = require("./config/db");
-const Faction = require("./models/Faction");
-const factionsRoutes = require("./routes/factionsRoutes");
-const { fetchAndStoreFactions } = require("./services/fetchExternalData");
-const authRoutes = require("./routes/authRoutes");
+import connectDB from "./config/db.js";
+import Faction from "./models/Faction.js";
+import factionsRoutes from "./routes/factionsRoutes.js";
+import { fetchAndStoreFactions } from "./services/fetchExternalData.js";
+import authRoutes from "./routes/authRoutes.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(json());
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", serve, setup(swaggerSpec));
 
 // Connect to MongoDB
 async function startServer() {
@@ -68,6 +70,7 @@ async function startServer() {
     // Routes
     app.use("/api/factions", factionsRoutes);
     app.use("/api/auth", authRoutes); // Authentication routes
+    app.use("/api/feedback", feedbackRoutes); // Feedback routes
 
     // Test route to verify POST works
     app.post("/test", (req, res) => res.json({ message: "Test route works!" }));
