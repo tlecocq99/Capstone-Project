@@ -113,19 +113,20 @@ function FactionsListPage() {
 
   return (
     <Container
-      maxWidth="xl"
+      disableGutters
+      maxWidth={false}
       sx={{
-        height: "100vh", // lock to viewport
+        width: "100vw",
+        height: "100vh",
         backgroundImage: "url('/splashArt.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        borderRadius: 2,
-        overflow: "hidden", // prevent outer scroll
+        overflow: "hidden",
         position: "relative",
-        py: { xs: 4, md: 6 },
-        px: { xs: 2, md: 4 },
         display: "flex",
         flexDirection: "column",
+        px: { xs: 2, md: 4 },
+        pt: { xs: 4, md: 6 },
       }}
     >
       {/* Login button container */}
@@ -156,17 +157,19 @@ function FactionsListPage() {
       >
         Warhammer 3 Faction Guides
       </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          gap: 2,
-          mb: 2,
-          alignItems: "stretch",
-          flexWrap: "wrap",
-          flexDirection: { xs: "column", sm: "row" },
-          "& > *": { flex: { xs: "1 1 auto", sm: "unset" } },
-        }}
-      >
+      {/* Shared width wrapper so controls align with first card */}
+      <Box sx={{ width: '100%', maxWidth: 1400, mx: 'auto', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            mb: 2,
+            alignItems: "stretch",
+            flexWrap: "wrap",
+            flexDirection: { xs: "column", sm: "row" },
+            "& > *": { flex: { xs: "1 1 auto", sm: "unset" } },
+          }}
+        >
         <TextField
           fullWidth
           placeholder="Search for a faction, lord, or race..."
@@ -191,7 +194,18 @@ function FactionsListPage() {
         >
           Feeling Frisky? (Random Faction)
         </Button>
-        {user && (
+        <Button
+          variant="contained"
+          color="info"
+          component="a"
+          href="https://community.creative-assembly.com/total-war/total-war-warhammer/blogs"
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ height: { xs: 40, sm: "auto" }, whiteSpace: "nowrap" }}
+        >
+          Dev Blogs & Patch Notes
+        </Button>
+  {user && (
           <FormControl
             sx={{ minWidth: 180, flex: { xs: "1 1 auto", sm: "unset" } }}
           >
@@ -249,7 +263,7 @@ function FactionsListPage() {
           onClose={() => setOpenRandomModal(false)}
           navigateToFaction={(slug) => navigate(`/factions/${slug}`)}
         />
-      </Box>
+  </Box>
       <Dialog open={filterOpen} onClose={() => setFilterOpen(false)}>
         <DialogTitle>Filter Factions</DialogTitle>
         <DialogContent sx={{ minWidth: 300 }}>
@@ -288,15 +302,8 @@ function FactionsListPage() {
         </DialogActions>
       </Dialog>
       <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
-        <Box
-          sx={{
-            height: "100%",
-            overflowY: "auto",
-            pr: 1,
-            pb: 2,
-          }}
-        >
-          <Grid container spacing={2} justifyContent="center">
+        <Box sx={{ height: '100%', overflowY: 'auto', pr: 1, pb: 2 }}>
+          <Grid container spacing={2} justifyContent="flex-start">
             {filtered.map((f) => (
               <Grid
                 item
@@ -351,6 +358,7 @@ function FactionsListPage() {
       {(!Array.isArray(filtered) || filtered.length === 0) && (
         <Typography>No factions found or loading...</Typography>
       )}
+      </Box>
     </Container>
   );
 }
