@@ -48,7 +48,7 @@ A full‑stack web project that centralizes **Total War: Warhammer III** campaig
 
 ## Screenshots
 
-> Replace these with real screenshots once deployed.
+> To be added.
 
 - **Home Page** – landing, quick actions
 - **Factions List** – search, filters, randomizer
