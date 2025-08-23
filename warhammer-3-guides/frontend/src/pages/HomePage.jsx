@@ -28,28 +28,55 @@ export default function HomePage() {
   return (
     <Fade in={true} timeout={2000}>
       <Container
-        maxWidth="xl"
+        disableGutters
+        maxWidth={false}
         sx={{
-          minHeight: "100vh",
+          width: "100vw",
+          height: "100vh",
           backgroundImage: "url('/splashArt.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "center",
+          overflow: "hidden",
+          position: "relative",
+          py: { xs: 4, md: 6 },
+          px: { xs: 2, md: 4 },
         }}
       >
+        {/* Login Button (top-right overlay) */}
+        <Box sx={{ position: "absolute", top: 12, right: 16, zIndex: 10 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleLoginOpen}
+            size={isXs ? "small" : "medium"}
+          >
+            {user ? `Logged in as ${user.username}` : "Login"}
+          </Button>
+          <LoginModal open={loginOpen} handleClose={handleLoginClose} />
+        </Box>
+
         <Paper
-          elevation={6}
+          elevation={10}
           sx={{
-            backgroundColor: "rgba(0,0,0,0.7)",
+            position: "relative",
+            background: "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.55))",
+            border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 4,
             p: { xs: 3, md: 6 },
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.37)",
+            boxShadow: "0 10px 35px -5px rgba(0,0,0,0.7)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            width: { xs: "100%", sm: 500 },
+            justifyContent: "center",
+            width: "100%",
+            maxWidth: 1100,
+            minHeight: { xs: "auto", md: "78vh" },
+            maxHeight: "88vh",
+            backdropFilter: "blur(6px)",
+            overflow: "hidden",
           }}
         >
           <Typography
@@ -61,18 +88,9 @@ export default function HomePage() {
               fontFamily: "Playfair Display",
               textAlign: "center",
               lineHeight: 1.2,
+              mb: 2,
             }}
           >
-            <div style={{ position: "absolute", top: 4, right: 8 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleLoginOpen}
-              >
-                {user ? `Logged in as ${user.username}` : "Login"}
-              </Button>
-            </div>
-            <LoginModal open={loginOpen} handleClose={handleLoginClose} />
             Warhammer 3 Guides
           </Typography>
           <Typography
@@ -83,6 +101,7 @@ export default function HomePage() {
               textShadow: "1px 2px 6px #000",
               textAlign: "center",
               px: { xs: 1, md: 0 },
+              maxWidth: 780,
             }}
           >
             Your one-stop-shop for detailed faction guides.
@@ -95,6 +114,7 @@ export default function HomePage() {
               flexWrap: "wrap",
               justifyContent: "center",
               width: "100%",
+              position: "relative",
             }}
           >
             <Button
